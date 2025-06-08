@@ -196,3 +196,4 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 /video_data
+node_modules/

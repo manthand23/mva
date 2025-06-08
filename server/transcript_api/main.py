@@ -1,4 +1,11 @@
+import sys
+import os
+
+# Add the parent directory (which is 'server') to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -8,6 +15,19 @@ from utils.transcript_utils import (
 )
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",  # Your Next.js frontend origin
+    "http://localhost:8000",  # Your backend origin (if you access it directly)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"]
+)
 
 CHUNK_SIZE = 1000  # Can be adjusted based on your needs
 
@@ -50,7 +70,7 @@ async def handle_user_query(payload: QueryRequest):
         response = generate_rag_response(relevant_chunks, payload.user_query)
         return {
             "chunks": relevant_chunks,
-            "response": response.choices[0].message["content"]
+            "response": response.choices[0].message.content
         }
 
     except Exception as e:
